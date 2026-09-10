@@ -152,7 +152,7 @@ u8 GetWalkInPlaceFasterMovementAction(u8);
 u8 GetWalkInPlaceFastMovementAction(u8);
 u8 GetWalkInPlaceNormalMovementAction(u8);
 u8 GetWalkInPlaceSlowMovementAction(u8);
-u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 dir);
+u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction);
 void MoveCoords(u8 direction, s16 *x, s16 *y);
 bool8 ObjectEventIsHeldMovementActive(struct ObjectEvent *objectEvent);
 u8 ObjectEventClearHeldMovementIfFinished(struct ObjectEvent *objectEvent);

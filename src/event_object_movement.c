@@ -4638,13 +4638,13 @@ static u8 GetCollisionInDirection(struct ObjectEvent *objectEvent, u8 direction)
     return GetCollisionAtCoords(objectEvent, x, y, direction);
 }
 
-u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 dir)
+u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction)
 {
     if (IsCoordOutsideObjectEventMovementRange(objectEvent, x, y))
         return COLLISION_OUTSIDE_RANGE;
-    else if (MapGridGetCollisionAt(x, y) || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, dir))
+    else if (MapGridGetCollisionAt(x, y) || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, direction))
         return COLLISION_IMPASSABLE;
-    else if (objectEvent->trackedByCamera && !CanCameraMoveInDirection(dir))
+    else if (objectEvent->trackedByCamera && !CanCameraMoveInDirection(direction))
         return COLLISION_IMPASSABLE;
     else if (IsElevationMismatchAt(objectEvent->currentElevation, x, y))
         return COLLISION_ELEVATION_MISMATCH;
@@ -4757,15 +4757,15 @@ static void UNUSED MoveCoordsInMapCoordIncrement(u8 direction, s16 *x, s16 *y)
     *y += sDirectionToVectors[direction].y << 4;
 }
 
-static void MoveCoordsInDirection(u8 dir, s16 *x, s16 *y, s16 deltaX, s16 deltaY)
+static void MoveCoordsInDirection(u8 direction, s16 *x, s16 *y, s16 deltaX, s16 deltaY)
 {
-    if (sDirectionToVectors[dir].x > 0)
+    if (sDirectionToVectors[direction].x > 0)
         *x += deltaX;
-    if (sDirectionToVectors[dir].x < 0)
+    if (sDirectionToVectors[direction].x < 0)
         *x -= deltaX;
-    if (sDirectionToVectors[dir].y > 0)
+    if (sDirectionToVectors[direction].y > 0)
         *y += deltaY;
-    if (sDirectionToVectors[dir].y < 0)
+    if (sDirectionToVectors[direction].y < 0)
         *y -= deltaY;
 }
 
@@ -8154,34 +8154,37 @@ void UnfreezeObjectEvents(void)
             UnfreezeObjectEvent(&gObjectEvents[i]);
 }
 
-static void Step1(struct Sprite *sprite, u8 dir)
+// Each step function moves the sprite along its direction vector by N pixels per frame.
+// Over the course of the step animation, these sum to 16 pixels (one full metatile).
+// The left-shifts represent pixel displacements per frame (e.g. << 3 moves 8 pixels, or one 8x8 tile):
+static void Step1(struct Sprite *sprite, u8 direction)
 {
-    sprite->x += sDirectionToVectors[dir].x;
-    sprite->y += sDirectionToVectors[dir].y;
+    sprite->x += sDirectionToVectors[direction].x;
+    sprite->y += sDirectionToVectors[direction].y;
 }
 
-static void Step2(struct Sprite *sprite, u8 dir)
+static void Step2(struct Sprite *sprite, u8 direction)
 {
-    sprite->x += sDirectionToVectors[dir].x << 1;
-    sprite->y += sDirectionToVectors[dir].y << 1;
+    sprite->x += sDirectionToVectors[direction].x << 1;
+    sprite->y += sDirectionToVectors[direction].y << 1;
 }
 
-static void Step3(struct Sprite *sprite, u8 dir)
+static void Step3(struct Sprite *sprite, u8 direction)
 {
-    sprite->x += (sDirectionToVectors[dir].x << 1) + sDirectionToVectors[dir].x;
-    sprite->y += (sDirectionToVectors[dir].y << 1) + sDirectionToVectors[dir].y;
+    sprite->x += (sDirectionToVectors[direction].x << 1) + sDirectionToVectors[direction].x;
+    sprite->y += (sDirectionToVectors[direction].y << 1) + sDirectionToVectors[direction].y;
 }
 
-static void Step4(struct Sprite *sprite, u8 dir)
+static void Step4(struct Sprite *sprite, u8 direction)
 {
-    sprite->x += sDirectionToVectors[dir].x << 2;
-    sprite->y += sDirectionToVectors[dir].y << 2;
+    sprite->x += sDirectionToVectors[direction].x << 2;
+    sprite->y += sDirectionToVectors[direction].y << 2;
 }
 
-static void Step8(struct Sprite *sprite, u8 dir)
+static void Step8(struct Sprite *sprite, u8 direction)
 {
-    sprite->x += sDirectionToVectors[dir].x << 3;
-    sprite->y += sDirectionToVectors[dir].y << 3;
+    sprite->x += sDirectionToVectors[direction].x << 3;
+    sprite->y += sDirectionToVectors[direction].y << 3;
 }
 
 #define sSpeed data[4]
